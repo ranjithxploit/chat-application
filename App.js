@@ -1,0 +1,51 @@
+// App.js
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { auth } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import LoginScreen from './LoginScreen';
+import RegisterScreen from './RegisterScreen';
+import HomeScreen from './HomeScreen';
+import ChatScreen from './ChatScreen';
+import ProfileScreen from './ProfileScreen';
+
+const Stack = createNativeStackNavigator();
+
+export default function App(){
+  const [user, setUser] = useState(null);
+  const [initializing, setInitializing] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u || null);
+      setInitializing(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  if(initializing) return null;
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        {user ? (
+          <>
+            <Stack.Screen name="Home" options={{title:'Chats'}} >
+              {props => <HomeScreen {...props} user={user} />}
+            </Stack.Screen>
+            <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="Profile">
+              {props => <ProfileScreen {...props} user={user} />}
+            </Stack.Screen>
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}

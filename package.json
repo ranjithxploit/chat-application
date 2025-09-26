@@ -1,0 +1,36 @@
+{
+  "name": "chatapp",
+  "license": "0BSD",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^7.1.17",
+    "@react-navigation/native-stack": "^7.3.26",
+    "@react-navigation/stack": "^7.4.8",
+    "expo": "~54.0.10",
+    "expo-av": "~16.0.7",
+    "expo-image-picker": "~17.0.8",
+    "expo-status-bar": "~3.0.8",
+    "firebase": "^9.22.0",
+    "react": "19.1.0",
+    "react-native": "0.81.4",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-gifted-chat": "^2.8.1",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0"
+  },
+  "overrides": {
+    "react-native-worklets": "0.5.1"
+  },
+  "private": true,
+  "devDependencies": {
+    "@react-native-community/cli": "^20.0.2"
+  }
+}
