@@ -1,4 +1,3 @@
-// RegisterScreen.js
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { collection, doc, setDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
@@ -6,14 +5,12 @@ import { db } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase';
 
-// utility to generate 6-8 digit unique code
 const genUsercode = () => {
   const size = Math.random() > 0.5 ? 6 : 7;
   let code = '';
   for(let i=0;i<size;i++) code += Math.floor(Math.random()*10);
   return code;
 };
-
 export default function RegisterScreen({navigation}){
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,16 +20,13 @@ export default function RegisterScreen({navigation}){
     const snap = await getDocs(q);
     return snap.empty;
   };
-
   const createUniqueUsercode = async () => {
-    // naive retry loop
     for(let i=0;i<8;i++){
       const code = genUsercode();
       const q = query(collection(db,'users'), where('usercode','==', code));
       const snap = await getDocs(q);
       if(snap.empty) return code;
     }
-    // fallback random longer
     return String(Date.now()).slice(-8);
   };
 
@@ -41,8 +35,6 @@ export default function RegisterScreen({navigation}){
     try{
       const ok = await checkUsernameUnique(username);
       if(!ok){ Alert.alert('username taken'); return; }
-
-      // use a fake email so firebase auth works with username
       const fakeEmail = `${username}@chatapp.local`;
       const userCred = await createUserWithEmailAndPassword(auth, fakeEmail, password);
       const uid = userCred.user.uid;

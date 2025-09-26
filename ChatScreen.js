@@ -1,32 +1,41 @@
-// ChatScreen.js
 import React, {useState, useEffect, useRef} from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { db, storage } from './firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Audio } from 'expo-av';
 
 export default function ChatScreen({route}){
-  const { chatId = 'local', other = { username: 'Friend' }, currentUid = 'me' } = route?.params || {};
+  const { chatId, other } = route.params;
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [recording, setRecording] = useState(null);
   const [sending, setSending] = useState(false);
 
-  // local in-memory messages for demo
-  useEffect(()=>{
-    setMessages([
-      { id: 'm1', type: 'text', text: `Hello from ${other.username}`, from: other.id || 'other' },
-    ]);
-  },[]);
+  useEffect(() => {
+    const messagesRef = collection(db, 'chats', chatId, 'messages');
+    const q = query(messagesRef, orderBy('createdAt','asc'));
+    const unsub = onSnapshot(q, snap => {
+      const arr = [];
+      snap.forEach(d => arr.push({id: d.id, ...d.data()}));
+      setMessages(arr);
+    });
+    return unsub;
+  }, [chatId]);
 
   const sendText = async () => {
     if(!text) return;
     setSending(true);
-    const msg = { id: String(Date.now()), type: 'text', text, from: currentUid };
-    setMessages(m => [...m, msg]);
+    await addDoc(collection(db, 'chats', chatId, 'messages'), {
+      type: 'text',
+      text,
+      from: route.params.currentUid || 'unknown',
+      createdAt: serverTimestamp()
+    });
     setText('');
     setSending(false);
   };
 
-  // AUDIO record functions using expo-av
   const startRecording = async () => {
     try {
       await Audio.requestPermissionsAsync();
@@ -46,9 +55,16 @@ export default function ChatScreen({route}){
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-      // local: just add a message with local uri
-      const msg = { id: String(Date.now()), type: 'audio', audioURL: uri, from: currentUid };
-      setMessages(m => [...m, msg]);
+      const blob = await (await fetch(uri)).blob();
+      const storageRef = ref(storage, `audio/${chatId}_${Date.now()}.m4a`);
+      await uploadBytes(storageRef, blob);
+      const url = await getDownloadURL(storageRef);
+      await addDoc(collection(db,'chats',chatId,'messages'), {
+        type: 'audio',
+        audioURL: url,
+        from: route.params.currentUid || 'unknown',
+        createdAt: serverTimestamp()
+      });
     }catch(err){ console.log(err); }
   };
 

@@ -1,7 +1,7 @@
-// LoginScreen.js
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-// Local-only login (no Firebase) for now
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './firebase';
 
 export default function LoginScreen({navigation}){
   const [username, setUsername] = useState('');
@@ -9,9 +9,13 @@ export default function LoginScreen({navigation}){
 
   const handleLogin = async () => {
     if(!username || !password){ Alert.alert('fill fields'); return; }
-    // create a local user object and navigate to Home
-    const user = { uid: Date.now().toString(), username };
-    navigation.replace('Home', { user });
+    try{
+      const fakeEmail = `${username}@chatapp.local`;
+      await signInWithEmailAndPassword(auth, fakeEmail, password);
+    }catch(err){
+      console.log(err);
+      Alert.alert('Login failed', err.message || String(err));
+    }
   };
 
   return (
