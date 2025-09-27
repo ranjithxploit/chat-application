@@ -1,40 +1,8 @@
 // Mock Firebase for testing - bypasses all Firebase Auth issues
 
-// Safe AsyncStorage implementation with multiple fallback strategies
+// Simple memory storage - no external dependencies
 const createAsyncStorage = () => {
-  // Strategy 1: Try AsyncStorage (React Native)
-  try {
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    if (AsyncStorage) {
-      console.log('Using native AsyncStorage');
-      return AsyncStorage;
-    }
-  } catch (error) {
-    // AsyncStorage not available, continue to next strategy
-  }
-
-  // Strategy 2: Try localStorage (Web)
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      console.log('Using localStorage fallback');
-      return {
-        async getItem(key) {
-          return localStorage.getItem(key);
-        },
-        async setItem(key, value) {
-          localStorage.setItem(key, value);
-        },
-        async removeItem(key) {
-          localStorage.removeItem(key);
-        }
-      };
-    }
-  } catch (error) {
-    // localStorage not available, continue to next strategy
-  }
-
-  // Strategy 3: Memory storage fallback (Universal)
-  console.log('Using memory storage fallback');
+  console.log('Using memory storage for mock Firebase');
   const memoryStorage = {
     storage: {},
     async getItem(key) {
@@ -47,7 +15,6 @@ const createAsyncStorage = () => {
       delete this.storage[key];
     }
   };
-
   return memoryStorage;
 };
 
