@@ -18,8 +18,8 @@ const createAsyncStorage = () => {
   return memoryStorage;
 };
 
-const asyncStorage = createAsyncStorage();
-console.log('Mock Firebase services initialized with storage backend');
+// Storage disabled to avoid AsyncStorage errors
+console.log('Mock Firebase services initialized - memory only');
 
 // Mock user data storage
 let mockUsers = new Map();
@@ -33,35 +33,35 @@ let authListeners = [];
 // Initialize mock users from asyncStorage
 const initializeMockData = async () => {
   try {
-    const storedUsers = await asyncStorage.getItem('mockUsers');
+    const storedUsers = // Memory storage - no persistence
     if (storedUsers) {
       const usersArray = JSON.parse(storedUsers);
       mockUsers = new Map(usersArray);
       console.log('Loaded', mockUsers.size, 'users from storage');
     }
 
-    const storedFriendRequests = await asyncStorage.getItem('mockFriendRequests');
+    const storedFriendRequests = // Memory storage - no persistence
     if (storedFriendRequests) {
       const requestsArray = JSON.parse(storedFriendRequests);
       mockFriendRequests = new Map(requestsArray);
       console.log('Loaded friend requests from storage');
     }
 
-    const storedNotifications = await asyncStorage.getItem('mockNotifications');
+    const storedNotifications = // Memory storage - no persistence
     if (storedNotifications) {
       const notificationsArray = JSON.parse(storedNotifications);
       mockNotifications = new Map(notificationsArray);
       console.log('Loaded notifications from storage');
     }
 
-    const storedChats = await asyncStorage.getItem('mockChats');
+    const storedChats = // Memory storage - no persistence
     if (storedChats) {
       const chatsArray = JSON.parse(storedChats);
       mockChats = new Map(chatsArray);
       console.log('Loaded chats from storage');
     }
 
-    const storedLastMessages = await asyncStorage.getItem('mockLastMessages');
+    const storedLastMessages = // Memory storage - no persistence
     if (storedLastMessages) {
       const lastMessagesArray = JSON.parse(storedLastMessages);
       mockLastMessages = new Map(lastMessagesArray);
@@ -76,7 +76,7 @@ const initializeMockData = async () => {
 const saveMockUsers = async () => {
   try {
     const usersArray = Array.from(mockUsers.entries());
-    await asyncStorage.setItem('mockUsers', JSON.stringify(usersArray));
+    // Memory storage - no persistence
     console.log('Saved', mockUsers.size, 'users to storage');
   } catch (err) {
     console.log('Error saving mock users:', err);
@@ -87,7 +87,7 @@ const saveMockUsers = async () => {
 const saveFriendRequests = async () => {
   try {
     const requestsArray = Array.from(mockFriendRequests.entries());
-    await asyncStorage.setItem('mockFriendRequests', JSON.stringify(requestsArray));
+    // Memory storage - no persistence
     console.log('Saved friend requests to storage');
   } catch (err) {
     console.log('Error saving friend requests:', err);
@@ -98,7 +98,7 @@ const saveFriendRequests = async () => {
 const saveNotifications = async () => {
   try {
     const notificationsArray = Array.from(mockNotifications.entries());
-    await asyncStorage.setItem('mockNotifications', JSON.stringify(notificationsArray));
+    // Memory storage - no persistence
     console.log('Saved notifications to storage');
   } catch (err) {
     console.log('Error saving notifications:', err);
@@ -109,7 +109,7 @@ const saveNotifications = async () => {
 const saveChats = async () => {
   try {
     const chatsArray = Array.from(mockChats.entries());
-    await asyncStorage.setItem('mockChats', JSON.stringify(chatsArray));
+    // Memory storage - no persistence
     console.log('Saved chats to storage');
   } catch (err) {
     console.log('Error saving chats:', err);
@@ -120,7 +120,7 @@ const saveChats = async () => {
 const saveLastMessages = async () => {
   try {
     const lastMessagesArray = Array.from(mockLastMessages.entries());
-    await asyncStorage.setItem('mockLastMessages', JSON.stringify(lastMessagesArray));
+    // Memory storage - no persistence
     console.log('Saved last messages to storage');
   } catch (err) {
     console.log('Error saving last messages:', err);
@@ -172,7 +172,7 @@ export const mockAuth = {
     this.currentUser = currentUser;
     
     // Store in asyncStorage
-    await asyncStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // Memory storage - no persistence
     
     // Notify auth listeners
     notifyAuthListeners(currentUser);
@@ -219,7 +219,7 @@ export const mockAuth = {
     this.currentUser = currentUser;
     
     // Store in asyncStorage
-    await asyncStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // Memory storage - no persistence
     
     // Notify auth listeners
     notifyAuthListeners(currentUser);
@@ -232,7 +232,7 @@ export const mockAuth = {
     console.log('Mock logout');
     currentUser = null;
     this.currentUser = null;
-    await asyncStorage.removeItem('currentUser');
+    // Storage disabled
     
     // Notify auth listeners
     notifyAuthListeners(null);
@@ -275,7 +275,7 @@ export const mockAuth = {
     mockLastMessages.clear();
     currentUser = null;
     this.currentUser = null;
-    await asyncStorage.multiRemove(['mockUsers', 'currentUser', 'mockFriendRequests', 'mockNotifications', 'mockChats', 'mockLastMessages']);
+    // Storage disabled
     console.log('All mock data cleared');
   },
 
@@ -599,7 +599,7 @@ export const mockDb = {
         
         userRequests.push(newRequest);
         mockFriendRequests.set(toUserId, userRequests);
-        await asyncStorage.setItem('mockFriendRequests', JSON.stringify([...mockFriendRequests]));
+        // Memory storage - no persistence
         console.log('Friend request added successfully:', newRequest);
         return newRequest;
       }
@@ -616,7 +616,7 @@ export const mockDb = {
       const userRequests = mockFriendRequests.get(userId) || [];
       const updatedRequests = userRequests.filter(req => req.id !== requestId);
       mockFriendRequests.set(userId, updatedRequests);
-      await asyncStorage.setItem('mockFriendRequests', JSON.stringify([...mockFriendRequests]));
+      // Memory storage - no persistence
       console.log('Friend request removed successfully');
       return true;
     } catch (error) {
