@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { auth, db } from './firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 
 const genUsercode = () => {
   const size = Math.random() > 0.5 ? 6 : 7;
@@ -13,14 +15,18 @@ export default function RegisterScreen({navigation}){
   const [password, setPassword] = useState('');
 
   const checkUsernameUnique = async (usernameVal) => {
-    const users = await db.collection('users').where('username', '==', usernameVal).get();
-    return users.length === 0;
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', usernameVal));
+    const users = await getDocs(q);
+    return users.empty;
   };
   const createUniqueUsercode = async () => {
     for(let i=0;i<8;i++){
       const code = genUsercode();
-      const users = await db.collection('users').where('usercode', '==', code).get();
-      if(users.length === 0) return code;
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('usercode', '==', code));
+      const users = await getDocs(q);
+      if(users.empty) return code;
     }
     return String(Date.now()).slice(-8);
   };
@@ -31,12 +37,12 @@ export default function RegisterScreen({navigation}){
       const ok = await checkUsernameUnique(username);
       if(!ok){ Alert.alert('username taken'); return; }
       const fakeEmail = `${username}@chatapp.local`;
-      const userCred = await auth.createUserWithEmailAndPassword(fakeEmail, password);
+      const userCred = await createUserWithEmailAndPassword(auth, fakeEmail, password);
       const uid = userCred.user.uid;
 
       const usercode = await createUniqueUsercode();
 
-      await db.collection('users').doc(uid).set({
+      await setDoc(doc(db, 'users', uid), {
         username,
         usercode,
         displayName: username,

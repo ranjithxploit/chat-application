@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from './firebase';
+import { signOut } from 'firebase/auth';
 import { useTheme } from './ThemeContext';
 
 export default function HomeScreen({ navigation, user }) {
@@ -374,7 +375,7 @@ export default function HomeScreen({ navigation, user }) {
       <TouchableOpacity 
         style={styles.logoutBtn}
         onPress={() => {
-          auth.signOut();
+          signOut(auth);
           Alert.alert('Logged out', 'You have been logged out');
         }}
       >

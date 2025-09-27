@@ -18,12 +18,13 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    console.log('Setting up mock auth listener...');
+    console.log('Setting up Firebase auth listener...');
     
     const { auth } = require('./firebase');
+    const { onAuthStateChanged } = require('firebase/auth');
     
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log('Mock auth state changed:', user ? user.uid : 'No user');
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('Firebase auth state changed:', user ? user.uid : 'No user');
       setUser(user);
       setInitializing(false);
       setAuthReady(true);

@@ -11,13 +11,14 @@ export default function LoginScreen({navigation}){
     
     setLoading(true);
     try{
-      console.log('Attempting mock login...');
+      console.log('Attempting Firebase login...');
       
       const { auth } = await import('./firebase');
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
       const fakeEmail = `${username}@chatapp.local`;
       
-      await auth.signInWithEmailAndPassword(fakeEmail, password);
-      console.log('Mock login successful!');
+      await signInWithEmailAndPassword(auth, fakeEmail, password);
+      console.log('Firebase login successful!');
     }catch(err){
       console.log('Login error:', err);
       Alert.alert('Login failed', err.message || String(err));

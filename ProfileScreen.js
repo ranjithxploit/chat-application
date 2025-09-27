@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from './firebase';
+import { signOut } from 'firebase/auth';
 import { useTheme } from './ThemeContext';
 
 export default function ProfileScreen({ navigation, user }) {
@@ -65,7 +66,7 @@ export default function ProfileScreen({ navigation, user }) {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await signOut(auth);
       Alert.alert('Logged out', 'You have been logged out successfully');
     } catch (err) {
       console.log('Logout error:', err);
