@@ -1,7 +1,19 @@
 // Mock Firebase for testing - bypasses all Firebase Auth issues
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Simple memory storage - no external dependencies
+// Use AsyncStorage with fallback to memory storage
 const createAsyncStorage = () => {
+  try {
+    // Test if AsyncStorage is available
+    if (AsyncStorage && typeof AsyncStorage.getItem === 'function') {
+      console.log('Using AsyncStorage for mock Firebase persistence');
+      return AsyncStorage;
+    }
+  } catch (error) {
+    console.log('AsyncStorage not available, using memory storage');
+  }
+  
+  // Fallback to memory storage
   console.log('Using memory storage for mock Firebase');
   const memoryStorage = {
     storage: {},
@@ -18,8 +30,8 @@ const createAsyncStorage = () => {
   return memoryStorage;
 };
 
-// Mock Firebase for testing - memory only, no external dependencies
-console.log('Mock Firebase services initialized - memory only');
+const asyncStorage = createAsyncStorage();
+console.log('Mock Firebase services initialized with storage backend');
 
 // Mock user data storage
 let mockUsers = new Map();
