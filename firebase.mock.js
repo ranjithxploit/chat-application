@@ -1,5 +1,58 @@
 // Mock Firebase for testing - bypasses all Firebase Auth issues
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Safe AsyncStorage implementation with multiple fallback strategies
+const createAsyncStorage = () => {
+  // Strategy 1: Try AsyncStorage (React Native)
+  try {
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    if (AsyncStorage) {
+      console.log('Using native AsyncStorage');
+      return AsyncStorage;
+    }
+  } catch (error) {
+    // AsyncStorage not available, continue to next strategy
+  }
+
+  // Strategy 2: Try localStorage (Web)
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      console.log('Using localStorage fallback');
+      return {
+        async getItem(key) {
+          return localStorage.getItem(key);
+        },
+        async setItem(key, value) {
+          localStorage.setItem(key, value);
+        },
+        async removeItem(key) {
+          localStorage.removeItem(key);
+        }
+      };
+    }
+  } catch (error) {
+    // localStorage not available, continue to next strategy
+  }
+
+  // Strategy 3: Memory storage fallback (Universal)
+  console.log('Using memory storage fallback');
+  const memoryStorage = {
+    storage: {},
+    async getItem(key) {
+      return this.storage[key] || null;
+    },
+    async setItem(key, value) {
+      this.storage[key] = value;
+    },
+    async removeItem(key) {
+      delete this.storage[key];
+    }
+  };
+
+  return memoryStorage;
+};
+
+const asyncStorage = createAsyncStorage();
+console.log('Mock Firebase services initialized with storage backend');
 
 // Mock user data storage
 let mockUsers = new Map();
@@ -10,38 +63,38 @@ let mockLastMessages = new Map(); // chatId -> last message info
 let currentUser = null;
 let authListeners = [];
 
-// Initialize mock users from AsyncStorage
+// Initialize mock users from asyncStorage
 const initializeMockData = async () => {
   try {
-    const storedUsers = await AsyncStorage.getItem('mockUsers');
+    const storedUsers = await asyncStorage.getItem('mockUsers');
     if (storedUsers) {
       const usersArray = JSON.parse(storedUsers);
       mockUsers = new Map(usersArray);
       console.log('Loaded', mockUsers.size, 'users from storage');
     }
 
-    const storedFriendRequests = await AsyncStorage.getItem('mockFriendRequests');
+    const storedFriendRequests = await asyncStorage.getItem('mockFriendRequests');
     if (storedFriendRequests) {
       const requestsArray = JSON.parse(storedFriendRequests);
       mockFriendRequests = new Map(requestsArray);
       console.log('Loaded friend requests from storage');
     }
 
-    const storedNotifications = await AsyncStorage.getItem('mockNotifications');
+    const storedNotifications = await asyncStorage.getItem('mockNotifications');
     if (storedNotifications) {
       const notificationsArray = JSON.parse(storedNotifications);
       mockNotifications = new Map(notificationsArray);
       console.log('Loaded notifications from storage');
     }
 
-    const storedChats = await AsyncStorage.getItem('mockChats');
+    const storedChats = await asyncStorage.getItem('mockChats');
     if (storedChats) {
       const chatsArray = JSON.parse(storedChats);
       mockChats = new Map(chatsArray);
       console.log('Loaded chats from storage');
     }
 
-    const storedLastMessages = await AsyncStorage.getItem('mockLastMessages');
+    const storedLastMessages = await asyncStorage.getItem('mockLastMessages');
     if (storedLastMessages) {
       const lastMessagesArray = JSON.parse(storedLastMessages);
       mockLastMessages = new Map(lastMessagesArray);
@@ -52,55 +105,55 @@ const initializeMockData = async () => {
   }
 };
 
-// Save mock users to AsyncStorage
+// Save mock users to asyncStorage
 const saveMockUsers = async () => {
   try {
     const usersArray = Array.from(mockUsers.entries());
-    await AsyncStorage.setItem('mockUsers', JSON.stringify(usersArray));
+    await asyncStorage.setItem('mockUsers', JSON.stringify(usersArray));
     console.log('Saved', mockUsers.size, 'users to storage');
   } catch (err) {
     console.log('Error saving mock users:', err);
   }
 };
 
-// Save friend requests to AsyncStorage
+// Save friend requests to asyncStorage
 const saveFriendRequests = async () => {
   try {
     const requestsArray = Array.from(mockFriendRequests.entries());
-    await AsyncStorage.setItem('mockFriendRequests', JSON.stringify(requestsArray));
+    await asyncStorage.setItem('mockFriendRequests', JSON.stringify(requestsArray));
     console.log('Saved friend requests to storage');
   } catch (err) {
     console.log('Error saving friend requests:', err);
   }
 };
 
-// Save notifications to AsyncStorage
+// Save notifications to asyncStorage
 const saveNotifications = async () => {
   try {
     const notificationsArray = Array.from(mockNotifications.entries());
-    await AsyncStorage.setItem('mockNotifications', JSON.stringify(notificationsArray));
+    await asyncStorage.setItem('mockNotifications', JSON.stringify(notificationsArray));
     console.log('Saved notifications to storage');
   } catch (err) {
     console.log('Error saving notifications:', err);
   }
 };
 
-// Save chats to AsyncStorage
+// Save chats to asyncStorage
 const saveChats = async () => {
   try {
     const chatsArray = Array.from(mockChats.entries());
-    await AsyncStorage.setItem('mockChats', JSON.stringify(chatsArray));
+    await asyncStorage.setItem('mockChats', JSON.stringify(chatsArray));
     console.log('Saved chats to storage');
   } catch (err) {
     console.log('Error saving chats:', err);
   }
 };
 
-// Save last messages to AsyncStorage
+// Save last messages to asyncStorage
 const saveLastMessages = async () => {
   try {
     const lastMessagesArray = Array.from(mockLastMessages.entries());
-    await AsyncStorage.setItem('mockLastMessages', JSON.stringify(lastMessagesArray));
+    await asyncStorage.setItem('mockLastMessages', JSON.stringify(lastMessagesArray));
     console.log('Saved last messages to storage');
   } catch (err) {
     console.log('Error saving last messages:', err);
@@ -151,8 +204,8 @@ export const mockAuth = {
     
     this.currentUser = currentUser;
     
-    // Store in AsyncStorage
-    await AsyncStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // Store in asyncStorage
+    await asyncStorage.setItem('currentUser', JSON.stringify(currentUser));
     
     // Notify auth listeners
     notifyAuthListeners(currentUser);
@@ -198,8 +251,8 @@ export const mockAuth = {
     
     this.currentUser = currentUser;
     
-    // Store in AsyncStorage
-    await AsyncStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // Store in asyncStorage
+    await asyncStorage.setItem('currentUser', JSON.stringify(currentUser));
     
     // Notify auth listeners
     notifyAuthListeners(currentUser);
@@ -212,7 +265,7 @@ export const mockAuth = {
     console.log('Mock logout');
     currentUser = null;
     this.currentUser = null;
-    await AsyncStorage.removeItem('currentUser');
+    await asyncStorage.removeItem('currentUser');
     
     // Notify auth listeners
     notifyAuthListeners(null);
@@ -225,7 +278,7 @@ export const mockAuth = {
     authListeners.push(callback);
     
     // Check for stored user immediately
-    AsyncStorage.getItem('currentUser').then(stored => {
+    asyncStorage.getItem('currentUser').then(stored => {
       if (stored) {
         currentUser = JSON.parse(stored);
         this.currentUser = currentUser;
@@ -255,7 +308,7 @@ export const mockAuth = {
     mockLastMessages.clear();
     currentUser = null;
     this.currentUser = null;
-    await AsyncStorage.multiRemove(['mockUsers', 'currentUser', 'mockFriendRequests', 'mockNotifications', 'mockChats', 'mockLastMessages']);
+    await asyncStorage.multiRemove(['mockUsers', 'currentUser', 'mockFriendRequests', 'mockNotifications', 'mockChats', 'mockLastMessages']);
     console.log('All mock data cleared');
   },
 
@@ -579,7 +632,7 @@ export const mockDb = {
         
         userRequests.push(newRequest);
         mockFriendRequests.set(toUserId, userRequests);
-        await AsyncStorage.setItem('mockFriendRequests', JSON.stringify([...mockFriendRequests]));
+        await asyncStorage.setItem('mockFriendRequests', JSON.stringify([...mockFriendRequests]));
         console.log('Friend request added successfully:', newRequest);
         return newRequest;
       }
@@ -596,7 +649,7 @@ export const mockDb = {
       const userRequests = mockFriendRequests.get(userId) || [];
       const updatedRequests = userRequests.filter(req => req.id !== requestId);
       mockFriendRequests.set(userId, updatedRequests);
-      await AsyncStorage.setItem('mockFriendRequests', JSON.stringify([...mockFriendRequests]));
+      await asyncStorage.setItem('mockFriendRequests', JSON.stringify([...mockFriendRequests]));
       console.log('Friend request removed successfully');
       return true;
     } catch (error) {
