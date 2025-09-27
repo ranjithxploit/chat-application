@@ -18,7 +18,7 @@ const createAsyncStorage = () => {
   return memoryStorage;
 };
 
-// Storage disabled to avoid AsyncStorage errors
+// Mock Firebase for testing - memory only, no external dependencies
 console.log('Mock Firebase services initialized - memory only');
 
 // Mock user data storage
