@@ -33,35 +33,35 @@ let authListeners = [];
 // Initialize mock users from asyncStorage
 const initializeMockData = async () => {
   try {
-    const storedUsers = // Memory storage - no persistence
+    const storedUsers = null; // Memory storage - no persistence
     if (storedUsers) {
       const usersArray = JSON.parse(storedUsers);
       mockUsers = new Map(usersArray);
       console.log('Loaded', mockUsers.size, 'users from storage');
     }
 
-    const storedFriendRequests = // Memory storage - no persistence
+    const storedFriendRequests = null; // Memory storage - no persistence
     if (storedFriendRequests) {
       const requestsArray = JSON.parse(storedFriendRequests);
       mockFriendRequests = new Map(requestsArray);
       console.log('Loaded friend requests from storage');
     }
 
-    const storedNotifications = // Memory storage - no persistence
+    const storedNotifications = null; // Memory storage - no persistence
     if (storedNotifications) {
       const notificationsArray = JSON.parse(storedNotifications);
       mockNotifications = new Map(notificationsArray);
       console.log('Loaded notifications from storage');
     }
 
-    const storedChats = // Memory storage - no persistence
+    const storedChats = null; // Memory storage - no persistence
     if (storedChats) {
       const chatsArray = JSON.parse(storedChats);
       mockChats = new Map(chatsArray);
       console.log('Loaded chats from storage');
     }
 
-    const storedLastMessages = // Memory storage - no persistence
+    const storedLastMessages = null; // Memory storage - no persistence
     if (storedLastMessages) {
       const lastMessagesArray = JSON.parse(storedLastMessages);
       mockLastMessages = new Map(lastMessagesArray);
