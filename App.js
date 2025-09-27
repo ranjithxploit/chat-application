@@ -9,6 +9,9 @@ import RegisterScreen from './RegisterScreen';
 import HomeScreen from './HomeScreen';
 import ChatScreen from './ChatScreen';
 import ProfileScreen from './ProfileScreen';
+import './firebase'; // Initialize Firebase first
+import { auth } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,17 +23,21 @@ export default function App() {
   useEffect(() => {
     console.log('Setting up Firebase auth listener...');
     
-    const { auth } = require('./firebase');
-    const { onAuthStateChanged } = require('firebase/auth');
-    
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Firebase auth state changed:', user ? user.uid : 'No user');
-      setUser(user);
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        console.log('Firebase auth state changed:', user ? user.uid : 'No user');
+        setUser(user);
+        setInitializing(false);
+        setAuthReady(true);
+      });
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Error setting up auth listener:', error);
       setInitializing(false);
       setAuthReady(true);
-    });
+    }
 
-    return () => unsubscribe();
   }, []);
 
   if (initializing || !authReady) {

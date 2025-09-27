@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { auth } from './firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginScreen({navigation}){
   const [username, setUsername] = useState('');
@@ -13,8 +15,6 @@ export default function LoginScreen({navigation}){
     try{
       console.log('Attempting Firebase login...');
       
-      const { auth } = await import('./firebase');
-      const { signInWithEmailAndPassword } = await import('firebase/auth');
       const fakeEmail = `${username}@chatapp.local`;
       
       await signInWithEmailAndPassword(auth, fakeEmail, password);
