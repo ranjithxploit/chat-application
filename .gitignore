@@ -12,10 +12,18 @@ expo-env.d.ts
 
 # local env / secrets
 .env
-.env.*
+.env.local
+.env.production
+!.env.example
 firebase.js
-firebase.*
-[Ff]irebase*.js
+firebase.config.js
+
+# Sensitive files
+*.key
+*.pem
+*.p12
+google-services.json
+GoogleService-Info.plist
 
 # Native / generated
 /ios

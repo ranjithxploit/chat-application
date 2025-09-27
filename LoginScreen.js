@@ -1,20 +1,28 @@
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase';
 
 export default function LoginScreen({navigation}){
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if(!username || !password){ Alert.alert('fill fields'); return; }
+    if(!username || !password){ Alert.alert('Please fill all fields'); return; }
+    
+    setLoading(true);
     try{
+      console.log('Attempting mock login...');
+      
+      const { auth } = await import('./firebase');
       const fakeEmail = `${username}@chatapp.local`;
-      await signInWithEmailAndPassword(auth, fakeEmail, password);
+      
+      await auth.signInWithEmailAndPassword(fakeEmail, password);
+      console.log('Mock login successful!');
     }catch(err){
-      console.log(err);
+      console.log('Login error:', err);
       Alert.alert('Login failed', err.message || String(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -23,8 +31,8 @@ export default function LoginScreen({navigation}){
       <Text style={styles.title}>Welcome back</Text>
       <TextInput placeholder="username" value={username} onChangeText={setUsername} style={styles.input} />
       <TextInput placeholder="password" secureTextEntry value={password} onChangeText={setPassword} style={styles.input} />
-      <TouchableOpacity onPress={handleLogin} style={styles.btn}>
-        <Text style={styles.btnText}>Login</Text>
+      <TouchableOpacity onPress={handleLogin} style={[styles.btn, loading && styles.btnDisabled]} disabled={loading}>
+        <Text style={styles.btnText}>{loading ? 'Logging in...' : 'Login'}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={()=>navigation.navigate('Register')} style={{marginTop:12}}>
@@ -39,5 +47,6 @@ const styles = StyleSheet.create({
   title:{fontSize:22,marginBottom:20},
   input:{width:'100%',padding:12,borderWidth:1,borderRadius:8,marginVertical:8},
   btn:{backgroundColor:'#10b981',padding:12,borderRadius:8,width:'100%',alignItems:'center'},
+  btnDisabled:{backgroundColor:'#ccc'},
   btnText:{color:'#fff',fontWeight:'700'}
 });

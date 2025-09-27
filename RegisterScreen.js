@@ -1,9 +1,6 @@
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { collection, doc, setDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
-import { db } from './firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 
 const genUsercode = () => {
   const size = Math.random() > 0.5 ? 6 : 7;
@@ -16,16 +13,14 @@ export default function RegisterScreen({navigation}){
   const [password, setPassword] = useState('');
 
   const checkUsernameUnique = async (usernameVal) => {
-    const q = query(collection(db, 'users'), where('username', '==', usernameVal));
-    const snap = await getDocs(q);
-    return snap.empty;
+    const users = await db.collection('users').where('username', '==', usernameVal).get();
+    return users.length === 0;
   };
   const createUniqueUsercode = async () => {
     for(let i=0;i<8;i++){
       const code = genUsercode();
-      const q = query(collection(db,'users'), where('usercode','==', code));
-      const snap = await getDocs(q);
-      if(snap.empty) return code;
+      const users = await db.collection('users').where('usercode', '==', code).get();
+      if(users.length === 0) return code;
     }
     return String(Date.now()).slice(-8);
   };
@@ -36,12 +31,12 @@ export default function RegisterScreen({navigation}){
       const ok = await checkUsernameUnique(username);
       if(!ok){ Alert.alert('username taken'); return; }
       const fakeEmail = `${username}@chatapp.local`;
-      const userCred = await createUserWithEmailAndPassword(auth, fakeEmail, password);
+      const userCred = await auth.createUserWithEmailAndPassword(fakeEmail, password);
       const uid = userCred.user.uid;
 
       const usercode = await createUniqueUsercode();
 
-      await setDoc(doc(db, 'users', uid), {
+      await db.collection('users').doc(uid).set({
         username,
         usercode,
         displayName: username,
@@ -50,10 +45,10 @@ export default function RegisterScreen({navigation}){
         createdAt: new Date()
       });
 
-      Alert.alert('registered!','go to home');
+      Alert.alert('Success!', 'Account created successfully!');
     }catch(err){
       console.log(err);
-      Alert.alert('error', err.message || String(err));
+      Alert.alert('Error', err.message || String(err));
     }
   };
 
