@@ -245,7 +245,8 @@ export const mockAuth = {
     authListeners.push(callback);
     
     // Check for stored user immediately
-    asyncStorage.getItem('currentUser').then(stored => {
+    // Skip storage loading - use current user
+    Promise.resolve(null).then(stored => {
       if (stored) {
         currentUser = JSON.parse(stored);
         this.currentUser = currentUser;
