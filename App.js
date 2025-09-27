@@ -24,6 +24,13 @@ export default function App() {
     console.log('Setting up Firebase auth listener...');
     
     try {
+      if (!auth) {
+        console.error('Auth is not initialized');
+        setInitializing(false);
+        setAuthReady(true);
+        return;
+      }
+
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         console.log('Firebase auth state changed:', user ? user.uid : 'No user');
         setUser(user);

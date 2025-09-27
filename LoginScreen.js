@@ -15,6 +15,10 @@ export default function LoginScreen({navigation}){
     try{
       console.log('Attempting Firebase login...');
       
+      if (!auth) {
+        throw new Error('Firebase Auth is not initialized');
+      }
+      
       const fakeEmail = `${username}@chatapp.local`;
       
       await signInWithEmailAndPassword(auth, fakeEmail, password);
